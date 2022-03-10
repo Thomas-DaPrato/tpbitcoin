@@ -14,6 +14,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.lang.reflect.Type;
+import java.math.BigInteger;
 import java.net.URL;
 import java.time.YearMonth;
 import java.util.ArrayList;
@@ -28,21 +29,35 @@ public class App {
 
         //Q1  hashrate
         double localHashrate = new HashRateEstimator(5000,5).estimate();
+        System.out.println("Hash par seconde moyen : " + localHashrate);
 
         // Q2: latest  block  from mainet (bitcoin blockchain) and its predecessor
         Context context   = new Context(new UnitTestParams()); // required  for working with bitcoinj
         Explorer explorer = new Explorer(); // for interacting with blockchain.info API
+        Block latestBlock = explorer.getBlockFromHash(context.getParams(), explorer.getLatestHash());
+        /*System.out.println("HASH       : " + latestBlock.getHashAsString());
+        System.out.println("NONCE      : " + latestBlock.getNonce());
+        System.out.println("DIFFICULTY : " + latestBlock.getDifficultyTargetAsInteger());
+        System.out.println();
+        System.out.println("\n\nFIRST TRANSACTION  : " + latestBlock.getTransactions().get(0));
+        System.out.println("\n\nSECOND TRANSACTION : " + latestBlock.getTransactions().get(1));*/
         // Q3 Some TXs
 
         // Q4 Mine a new block
         Miner miner = new Miner(context.getParams());
         // empty list of tx since creating txs, even fake ones, requires some work
         ArrayList<Transaction> txs = new ArrayList<>();
-        // TODO : mine a new block
 
+        Block newBlock = miner.mine(latestBlock, txs, new ECKey().getPubKey());
+        System.out.println(newBlock.getNonce());
+        System.out.println(newBlock.getDifficultyTargetAsInteger());
 
         System.out.println("\n");
-        // Q9/Q10 energy w/ most profitable hardware
+        System.out.println("Expected time to mine : " + ImpactUtils.expectedMiningTime(localHashrate, latestBlock.getDifficultyTargetAsInteger()).divide(new BigInteger("31236000")));
+        BigInteger nbHashrate = ImpactUtils.globalHashRate(latestBlock.getDifficultyTargetAsInteger());
+        System.out.println("Current hashrate : " + nbHashrate);
+        System.out.println("Total conso in kwh : " + ImpactUtils.globalEnergyConsumption(new BigInteger("110"),3250L,nbHashrate,24));
+        /*// Q9/Q10 energy w/ most profitable hardware
         Gson gson = new GsonBuilder()
                 .registerTypeAdapter(YearMonth.class,new YearMonthAdapter())
                 .create();
@@ -54,7 +69,7 @@ public class App {
             hardwares = gson.fromJson(reader,listType);
         } catch (Exception e) {
             System.err.println("error opening/reading hardware.json "+ e.getMessage());
-        }
+        }*/
 
 
 

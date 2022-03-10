@@ -1,5 +1,6 @@
 package tpbitcoin;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 
 public class ImpactUtils {
@@ -15,8 +16,13 @@ public class ImpactUtils {
      * @return expected time in seconds before finding a correct block
      */
     // TODO
-    public static long expectedMiningTime(long hashrate, BigInteger difficultyAsInteger){
-        return 1L ;
+    public static BigInteger expectedMiningTime(double hashrate, BigInteger difficultyAsInteger){
+        System.out.println("DIFF : " + difficultyAsInteger);
+        System.out.println("LONG : " + difficultyAsInteger.longValue());
+        BigInteger maxValue = new BigInteger("2").pow(256);
+        System.out.println(maxValue);
+        BigInteger expectedTries = maxValue.divide(difficultyAsInteger);
+        return expectedTries.divide(BigDecimal.valueOf(hashrate).toBigInteger());
     }
 
     /**
@@ -25,8 +31,9 @@ public class ImpactUtils {
      * @return hashrate of the network in GH/s
      */
     // TODO
-    public static long  globalHashRate(BigInteger difficultyAsInteger){
-        return 1L;
+    public static BigInteger globalHashRate(BigInteger difficultyAsInteger){
+        BigInteger averageNumberOfTries = new BigInteger("2").pow(256).divide(difficultyAsInteger);
+        return averageNumberOfTries.divide(new BigInteger("600"));
     }
 
     /**
@@ -39,8 +46,11 @@ public class ImpactUtils {
      * @return energy consumed during duration, in kWh
      */
     // TODO
-    public static long globalEnergyConsumption(long minerHashrate, long minerPower, long networkHashrate, long duration){
-        return 1L;
+    public static BigInteger globalEnergyConsumption(BigInteger minerHashrate, long minerPower, BigInteger networkHashrate, long duration){
+       BigInteger capictyHS = minerHashrate.multiply(new BigInteger("10").pow(12));
+       BigInteger nbMiners = capictyHS.divide(networkHashrate);
+       BigInteger totalPower = nbMiners.multiply(new BigInteger(String.valueOf(minerPower)));
+       return totalPower.multiply(new BigInteger(String.valueOf(duration/1000)));
     }
 
 

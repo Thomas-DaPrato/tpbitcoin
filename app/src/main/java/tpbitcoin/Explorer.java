@@ -7,6 +7,7 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
 import java.util.HexFormat;
 
 public class Explorer {
@@ -35,6 +36,7 @@ public class Explorer {
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(baseURL+suffix))
                 .build();
+        System.out.println("REQUEST : " + request);
         HttpResponse<String> response = null;
         try {
             response = client.send(request, HttpResponse.BodyHandlers.ofString());
@@ -56,6 +58,11 @@ public class Explorer {
         return Double.parseDouble(answer);
     }
 
+    public double getDifficulty(){
+        String answer = request("q/getdifficulty");
+        return Double.parseDouble(answer);
+    }
+
     /**
      * Current price of 1BTC
      * @return price of 1BTC in $
@@ -68,7 +75,7 @@ public class Explorer {
 
     // TODO
     public String getLatestHash(){
-        return "";
+        return request("q/latesthash");
     }
 
 
@@ -79,7 +86,7 @@ public class Explorer {
      * @return byte array encoding the block
      */
     public byte[] getRawblockFromHash(String hash){
-        return null;
+        return hexStringToByte(request("rawblock/"+hash+"?format=hex"));
     }
 
     // TODO
@@ -92,7 +99,7 @@ public class Explorer {
      */
 	
     public Block getBlockFromHash(NetworkParameters params, String hash){
-        return null;
+        return fromRawblockToBlock(params, getRawblockFromHash(hash));
     }
 
 
